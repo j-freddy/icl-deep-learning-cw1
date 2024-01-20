@@ -1,4 +1,5 @@
 __pycache__/
 .OTTER_LOG
 buffer.py
+NaturalImageNet*
 sandbox.py
