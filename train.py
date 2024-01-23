@@ -98,7 +98,7 @@ def train_part(
             if t % 10 == 0:
                 print("Epoch: %d, Iteration %d, loss = %.4f" % (e, t, loss.item()))
 
-        check_accuracy(loader_val, model, device)
+        check_accuracy(loader_val, model, device, label="validation")
 
 def main(flags):
     if flags.no_train:
