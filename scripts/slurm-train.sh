@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 #SBATCH --gres=gpu:1
 #SBATCH --mail-type=ALL   # required to send email notifcations
 #SBATCH --mail-user=ffj20 # required to send email notifcations
