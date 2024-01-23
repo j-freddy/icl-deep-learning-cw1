@@ -3,16 +3,11 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import torch
-from torch.nn import Conv2d, MaxPool2d
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.utils.data import sampler
-from torchvision import datasets, transforms
-from torchvision.utils import save_image, make_grid
+from torchvision import transforms
+from torchvision.utils import make_grid
 
-from const import IMAGENET_MEAN, IMAGENET_STD, USE_GPU
+from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, USE_GPU
 
 def setup_device():
     if USE_GPU and torch.cuda.is_available():
@@ -128,3 +123,31 @@ def incorrect_preds(preds, y, test_img):
     print("Predicted label",labels[preds[incorrect_indexes].cpu().numpy()[:9]])
     print("True label", labels[y[incorrect_indexes].cpu().numpy()[:9]])
     print("Corresponding images are shown below")
+
+def check_accuracy(loader, model, device, analysis=False):
+    # function for test accuracy on validation and test set
+    
+    num_correct = 0
+    num_samples = 0
+    model.eval()  # set model to evaluation mode
+    with torch.no_grad():
+        for t, (x, y) in enumerate(loader):
+            x = x.to(device=device, dtype=INPUT_DTYPE)  # move to device
+            y = y.to(device=device, dtype=torch.long)
+            scores = model(x)
+            _, preds = scores.max(1)
+            num_correct += (preds == y).sum()
+            num_samples += preds.size(0)
+            if t == 0 and analysis:
+              stack_labels = y
+              stack_predicts = preds
+            elif analysis:
+              stack_labels = torch.cat([stack_labels, y], 0)
+              stack_predicts = torch.cat([stack_predicts, preds], 0)
+        acc = float(num_correct) / num_samples
+        print("Got %d / %d correct of val set (%.2f)" % (num_correct, num_samples, 100 * acc))
+        if analysis:
+          print("check acc", type(stack_predicts), type(stack_labels))
+          confusion(stack_predicts, stack_labels)
+          incorrect_preds(preds, y, x)
+        return float(acc)
