@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import torch
 from torch.nn import Conv2d, MaxPool2d
 import torch.nn as nn
@@ -10,7 +12,12 @@ from torch.utils.data import sampler
 from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
 
-from const import IMAGENET_MEAN, IMAGENET_STD
+from const import IMAGENET_MEAN, IMAGENET_STD, USE_GPU
+
+def setup_device():
+    if USE_GPU and torch.cuda.is_available():
+        return torch.device("cuda:0")
+    return torch.device("cpu")
 
 def split_dataset(train_set, val_split=0.1):
     n = len(train_set)
@@ -85,3 +92,39 @@ def view_samples(loader):
     plt.axis("off")
     show(img)
     plt.show()
+
+def confusion(preds, y):
+    labels = ["African Elephant", "Kingfisher", "Deer","Brown Bear", "Chameleon", "Dragonfly",
+        "Giant Panda", "Gorilla", "Hawk", "King Penguin", "Koala", "Ladybug", "Lion",
+        "Meerkat", "Orangutan", "Peacock", "Red Fox", "Snail", "Tiger", "White Rhino"]
+    # Plotting the confusion matrix
+    cm = confusion_matrix(y.cpu().numpy(), preds.cpu().numpy(), normalize="true")
+    fig, ax= plt.subplots(1, 1, figsize=(15,10))
+    sns.heatmap(cm, annot=True, ax = ax); #annot=True to annotate cells
+
+    # labels, title and ticks
+    ax.set_xlabel("Predicted labels");ax.set_ylabel("True labels"); 
+    ax.set_title("Confusion Matrix");
+    ax.xaxis.set_ticklabels(labels, rotation = 70); ax.yaxis.set_ticklabels(labels, rotation=0);
+    plt.show()
+
+def incorrect_preds(preds, y, test_img):
+    labels = ["African Elephant", "Kingfisher", "Deer","Brown Bear", "Chameleon", "Dragonfly",
+        "Giant Panda", "Gorilla", "Hawk", "King Penguin", "Koala", "Ladybug", "Lion",
+        "Meerkat", "Orangutan", "Peacock", "Red Fox", "Snail", "Tiger", "White Rhino"]
+    # lets see a sample of the images which were classified incorrectly!
+    correct = (preds == y).float()
+    test_labels_check = correct.cpu().numpy()
+    incorrect_indexes = np.where(test_labels_check == 0)
+
+    test_img = test_img.cpu()
+    samples = make_grid(denorm(test_img[incorrect_indexes][:9]), nrow=3,
+                        padding=2, normalize=False, value_range=None, 
+                        scale_each=False, pad_value=0)
+    plt.figure(figsize = (20,10))
+    plt.title("Incorrectly Classified Instances")
+    show(samples)
+    labels = np.asarray(labels)
+    print("Predicted label",labels[preds[incorrect_indexes].cpu().numpy()[:9]])
+    print("True label", labels[y[incorrect_indexes].cpu().numpy()[:9]])
+    print("Corresponding images are shown below")

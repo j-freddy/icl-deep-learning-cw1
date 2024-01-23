@@ -12,7 +12,7 @@ from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
 
 from const import IMAGENET_MEAN, IMAGENET_STD, SEED
-from utils import create_dataloaders, split_dataset, view_samples
+from utils import create_dataloaders, setup_device, split_dataset, view_samples
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -33,6 +33,8 @@ if __name__=="__main__":
     # Seed
     np.random.seed(SEED)
     torch.manual_seed(SEED)
+    
+    device = setup_device()
     
     transform = transforms.Compose(
         [
