@@ -124,7 +124,7 @@ def incorrect_preds(preds, y, test_img):
     print("True label", labels[y[incorrect_indexes].cpu().numpy()[:9]])
     print("Corresponding images are shown below")
 
-def check_accuracy(loader, model, device, analysis=False):
+def check_accuracy(loader, model, device, label, analysis=False):
     # function for test accuracy on validation and test set
     
     num_correct = 0
@@ -145,7 +145,7 @@ def check_accuracy(loader, model, device, analysis=False):
               stack_labels = torch.cat([stack_labels, y], 0)
               stack_predicts = torch.cat([stack_predicts, preds], 0)
         acc = float(num_correct) / num_samples
-        print("Got %d / %d correct of val set (%.2f)" % (num_correct, num_samples, 100 * acc))
+        print(f"Got %d / %d correct of {label} set (%.2f)" % (num_correct, num_samples, 100 * acc))
         if analysis:
           print("check acc", type(stack_predicts), type(stack_labels))
           confusion(stack_predicts, stack_labels)

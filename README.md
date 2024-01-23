@@ -5,7 +5,8 @@
 TODO
 
 ```sh
-python -m main --help
+python -m train --help
+python -m train --model_load_path model_baseline.pt --no_train
 ```
 
 ## Notes

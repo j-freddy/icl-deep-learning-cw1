@@ -1,15 +1,9 @@
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch.nn import Conv2d, MaxPool2d
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from torch.utils.data import sampler
 from torchvision import datasets, transforms
-from torchvision.utils import save_image, make_grid
 
 from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, SEED
 from resnet import MyResNet
@@ -21,14 +15,35 @@ def parse_args():
     parser.add_argument(
         "--view_samples",
         action=argparse.BooleanOptionalAction,
-        help="View sample images. Default: False",
+        help="View sample images.",
         default=False,
     )
 
     parser.add_argument(
         "--analysis",
         action=argparse.BooleanOptionalAction,
-        help="View confusion matrix and sample of incorrect predictions. Default: False",
+        help="View confusion matrix and sample of incorrect predictions.",
+        default=False,
+    )
+
+    parser.add_argument(
+        "--model_save_path",
+        type=str,
+        help="Save model to path. (default: model.pt)",
+        default="model.pt",
+    )
+
+    parser.add_argument(
+        "--model_load_path",
+        type=str,
+        help="Load existing model. (optional)",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--no_train",
+        action=argparse.BooleanOptionalAction,
+        help="Skip training. Only set to True if loading a model.",
         default=False,
     )
 
@@ -86,6 +101,9 @@ def train_part(
         check_accuracy(loader_val, model, device)
 
 def main(flags):
+    if flags.no_train:
+        assert flags.model_load_path is not None
+
     # Seed
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -131,28 +149,37 @@ def main(flags):
 
     # Train the network
     model = MyResNet()
+
+    # Continue training from existing model if specified
+    if flags.model_load_path is not None:
+        model.load_state_dict(
+            torch.load(flags.model_load_path, map_location=device)
+        )
+
     optimizer = optim.Adamax(model.parameters(), lr=0.0001, weight_decay=1e-7) 
 
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Total number of parameters is: {}".format(params))
 
-    train_part(
-        model,
-        optimizer,
-        device,
-        loader_train,
-        loader_val,
-        epochs=10,
-    )
+    if not flags.no_train:
+        train_part(
+            model,
+            optimizer,
+            device,
+            loader_train,
+            loader_val,
+            epochs=10,
+        )
 
-    # Report train set accuracy
-    check_accuracy(loader_train, model, device, analysis=flags.analysis)
-
-    # Report test set accuracy
-    check_accuracy(loader_val, model, device, analysis=flags.analysis)
+    # Report accuracy
+    print("Checking accuracy...")
+    check_accuracy(loader_train, model, device, "train", analysis=flags.analysis)
+    check_accuracy(loader_val, model, device, "validation", analysis=flags.analysis)
+    check_accuracy(loader_test, model, device, "test", analysis=flags.analysis)
 
     # Save the model
-    torch.save(model.state_dict(), "model.pt")
+    if not flags.no_train:
+        torch.save(model.state_dict(), flags.model_save_path)
 
 if __name__=="__main__":
     flags = parse_args()
