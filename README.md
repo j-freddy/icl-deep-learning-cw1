@@ -15,7 +15,10 @@ python -m main --help
 ```sh
 # Runtime on Paperspace P4000
 # 8 CPU | 30 GB RAM | 8 GB GPU
-13m 55.8s
+13m 55s
+# Runtime on DoC SLURM
+# MIG GPU
+11m 38s
 
 # Validation (last epoch)
 Got 727 / 1998 correct of val set (36.39)
