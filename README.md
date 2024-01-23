@@ -1,5 +1,13 @@
 # Deep Learning CW1
 
+## Usage
+
+TODO
+
+```sh
+python -m main --help
+```
+
 ## Notes
 
 ### ImageNet Baseline
@@ -15,3 +23,10 @@ Got 727 / 1998 correct of val set (36.39)
 # Test
 Got 691 / 2000 correct of val set (34.55)
 ```
+
+### Changes to Skeleton Code
+
+- overall refactor for maintainability (e.g. less local variables, modularise
+  code) and allow flexibility (e.g. `split_dataset` function with split factor
+  parameter)
+- no shuffling in test DataLoader
