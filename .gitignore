@@ -5,4 +5,5 @@ venv/
 .OTTER_LOG
 buffer.py
 *.pt
+!model_baseline.pt
 sandbox.py
