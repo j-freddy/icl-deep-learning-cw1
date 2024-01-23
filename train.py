@@ -145,6 +145,9 @@ def main(flags):
         epochs=10,
     )
 
+    # Report train set accuracy
+    check_accuracy(loader_train, model, device, analysis=flags.analysis)
+
     # Report test set accuracy
     check_accuracy(loader_val, model, device, analysis=flags.analysis)
 
