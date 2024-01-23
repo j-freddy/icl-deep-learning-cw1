@@ -142,7 +142,7 @@ def main(flags):
         device,
         loader_train,
         loader_val,
-        epochs=1,
+        epochs=10,
     )
 
     # Report test set accuracy
