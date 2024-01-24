@@ -3,10 +3,11 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets, transforms
+from torchvision import datasets
 from augmented_dataset import AugmentedDataset
 
-from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, SEED
+from const import INPUT_DTYPE, SEED
+from normalised_dataset import NormalisedDataset
 from resnet import MyResNet
 from utils import check_accuracy, create_dataloaders, setup_device, split_dataset, view_samples
 
@@ -93,30 +94,21 @@ def main(flags):
     torch.manual_seed(SEED)
     
     device = setup_device()
-    
-    transform = transforms.Compose(
-        [
-            transforms.Resize(256),
-            transforms.CenterCrop(256),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                IMAGENET_MEAN.tolist(),
-                IMAGENET_STD.tolist(),
-            ),
-        ]
-    )
 
     train_path = "NaturalImageNetTrain"
     test_path = "NaturalImageNetTest"
 
     # Create and split datasets
-    train_dataset = datasets.ImageFolder(train_path, transform=transform)
-    test_dataset = datasets.ImageFolder(test_path, transform=transform)
+    train_dataset = datasets.ImageFolder(train_path)
+    test_dataset = datasets.ImageFolder(test_path)
 
     train_set, val_set = split_dataset(train_dataset, val_split=0.1)
     
     # Augment the training set
     train_set = AugmentedDataset(train_set)
+    # Normalise the validation and test sets
+    val_set = NormalisedDataset(val_set)
+    test_dataset = NormalisedDataset(test_dataset)
 
     print(f"Train set: {len(train_set)}")
     print(f"Val set: {len(val_set)}")
@@ -132,7 +124,12 @@ def main(flags):
     
     # View sample images
     if flags.view_samples:
+        # View augmented samples
         view_samples(loader_train)
+        # View non-augmented samples
+        view_samples(loader_val)
+        # TODO Remove
+        assert False
 
     # Train the network
     model = MyResNet()

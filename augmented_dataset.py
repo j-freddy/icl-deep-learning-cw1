@@ -8,14 +8,24 @@ class AugmentedDataset(Dataset):
     self.data = data
     self.transform = transforms.Compose(
         [
-            # Original pipeline converts to Tensor, so convert back to PIL
-            # before performing image transforms
-          
-            # Note: Original pipeline already resizes to 256x256 and center
-            # crops
+            transforms.Resize(256),
 
-            transforms.ToPILImage(),
-            transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+            # Apply augmentations
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomResizedCrop(256, scale=(0.2, 1.0)),
+            transforms.RandomApply(
+                [
+                    transforms.ColorJitter(
+                        brightness=0.5,
+                        contrast=0.5,
+                        saturation=0.5,
+                        hue=0.1
+                    )
+                ],
+                p=0.75,
+            ),
+
+            # Normalise
             transforms.ToTensor(),
             transforms.Normalize(
                 IMAGENET_MEAN.tolist(),
