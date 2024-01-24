@@ -17,4 +17,4 @@ source activate
 # slurm-train
 # ==============================================================================
 
-python -m train
+python -m train --model_save_path model_augmented.pt

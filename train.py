@@ -15,6 +15,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--epochs",
+        type=int,
+        help="Number of training epochs. (default: 10)",
+        default=10,
+    )
+
+    parser.add_argument(
         "--model_save_path",
         type=str,
         help="Save model to path. (default: model.pt)",
@@ -145,7 +152,7 @@ def main(flags):
         device,
         loader_train,
         loader_val,
-        epochs=10,
+        epochs=flags.epochs,
     )
 
     # Report accuracy

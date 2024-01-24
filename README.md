@@ -20,12 +20,6 @@ python -m test --model_load_path model_baseline.pt
 # Runtime on DoC SLURM
 # MIG GPU
 11m 38s
-
-# Validation (last epoch)
-Got 727 / 1998 correct of val set (36.39)
-
-# Test
-Got 691 / 2000 correct of val set (34.55)
 ```
 
 ### Changes to Skeleton Code
