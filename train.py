@@ -4,6 +4,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
+from augmented_dataset import AugmentedDataset
 
 from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, SEED
 from resnet import MyResNet
@@ -114,6 +115,9 @@ def main(flags):
 
     train_set, val_set = split_dataset(train_dataset, val_split=0.1)
     
+    # Augment the training set
+    train_set = AugmentedDataset(train_set)
+
     print(f"Train set: {len(train_set)}")
     print(f"Val set: {len(val_set)}")
     print(f"Test set: {len(test_dataset)}")
@@ -128,7 +132,7 @@ def main(flags):
     
     # View sample images
     if flags.view_samples:
-        view_samples(loader_val)
+        view_samples(loader_train)
 
     # Train the network
     model = MyResNet()
