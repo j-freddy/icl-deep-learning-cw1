@@ -13,6 +13,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--model_save_path",
+        type=str,
+        help="Save model to path. (default: model.pt)",
+        default="model.pt",
+    )
+
+    parser.add_argument(
         "--view_samples",
         action=argparse.BooleanOptionalAction,
         help="View sample images.",
@@ -23,27 +30,6 @@ def parse_args():
         "--analysis",
         action=argparse.BooleanOptionalAction,
         help="View confusion matrix and sample of incorrect predictions.",
-        default=False,
-    )
-
-    parser.add_argument(
-        "--model_save_path",
-        type=str,
-        help="Save model to path. (default: model.pt)",
-        default="model.pt",
-    )
-
-    parser.add_argument(
-        "--model_load_path",
-        type=str,
-        help="Load existing model. (optional)",
-        default=None,
-    )
-
-    parser.add_argument(
-        "--no_train",
-        action=argparse.BooleanOptionalAction,
-        help="Skip training. Only set to True if loading a model.",
         default=False,
     )
 
@@ -101,9 +87,6 @@ def train_part(
         check_accuracy(loader_val, model, device, label="validation")
 
 def main(flags):
-    if flags.no_train:
-        assert flags.model_load_path is not None
-
     # Seed
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -150,26 +133,19 @@ def main(flags):
     # Train the network
     model = MyResNet()
 
-    # Continue training from existing model if specified
-    if flags.model_load_path is not None:
-        model.load_state_dict(
-            torch.load(flags.model_load_path, map_location=device)
-        )
-
     optimizer = optim.Adamax(model.parameters(), lr=0.0001, weight_decay=1e-7) 
 
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Total number of parameters is: {}".format(params))
 
-    if not flags.no_train:
-        train_part(
-            model,
-            optimizer,
-            device,
-            loader_train,
-            loader_val,
-            epochs=10,
-        )
+    train_part(
+        model,
+        optimizer,
+        device,
+        loader_train,
+        loader_val,
+        epochs=10,
+    )
 
     # Report accuracy
     print("Checking accuracy...")
@@ -178,8 +154,7 @@ def main(flags):
     check_accuracy(loader_test, model, device, "test", analysis=flags.analysis)
 
     # Save the model
-    if not flags.no_train:
-        torch.save(model.state_dict(), flags.model_save_path)
+    torch.save(model.state_dict(), flags.model_save_path)
 
 if __name__=="__main__":
     flags = parse_args()

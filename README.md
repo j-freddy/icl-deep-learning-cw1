@@ -6,7 +6,7 @@ TODO
 
 ```sh
 python -m train --help
-python -m train --model_load_path model_baseline.pt --no_train
+python -m test --model_load_path model_baseline.pt
 ```
 
 ## Notes
