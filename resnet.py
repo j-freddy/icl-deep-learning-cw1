@@ -51,7 +51,7 @@ class ResidualBlock(nn.Module):
 
 class ResNet(nn.Module):
     
-    def __init__(self, ResidualBlock, num_classes = 20):
+    def __init__(self, ResidualBlock, num_classes=20):
         super(ResNet, self).__init__()
 
         self.inchannel = 16
@@ -68,13 +68,14 @@ class ResNet(nn.Module):
             nn.ReLU(),
         )
         
+        self.maxpool = MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self.make_layer(ResidualBlock, 16, 2, stride=2)
         self.layer2 = self.make_layer(ResidualBlock, 32, 2, stride=2)
         self.layer3 = self.make_layer(ResidualBlock, 64, 2, stride=2)
         self.layer4 = self.make_layer(ResidualBlock, 128, 2, stride=2)
         self.layer5 = self.make_layer(ResidualBlock, 256, 2, stride=2)
         self.layer6 = self.make_layer(ResidualBlock, 512, 2, stride=2)
-        self.maxpool = MaxPool2d(4)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, num_classes)
 
     def make_layer(self, block, channels, num_blocks, stride):
@@ -89,13 +90,14 @@ class ResNet(nn.Module):
     
     def forward(self, x):
         x = self.conv1(x)
+        x = self.maxpool(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.layer6(x)
-        x = self.maxpool(x)
+        x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x
