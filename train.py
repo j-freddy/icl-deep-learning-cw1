@@ -157,6 +157,9 @@ def main(flags):
 
     # Report accuracy
     print("Checking accuracy...")
+    
+    # Note: This reports the training accuracy of the randomly augmented set. To
+    # report the accuracy of the original training set, use test.py.
     check_accuracy(loader_train, model, device, "train", analysis=flags.analysis)
     check_accuracy(loader_val, model, device, "validation", analysis=flags.analysis)
     check_accuracy(loader_test, model, device, "test", analysis=flags.analysis)
