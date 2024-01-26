@@ -4,10 +4,12 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import torch
 from torch.utils.data import DataLoader
-from torchvision import transforms
+from torchvision import datasets, transforms
 from torchvision.utils import make_grid
 
-from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, USE_GPU
+from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, SEED, USE_GPU
+from normalised_dataset import NormalisedDataset
+from resnet import MyResNet
 
 def setup_device():
     if USE_GPU and torch.cuda.is_available():
@@ -153,3 +155,56 @@ def check_accuracy(loader, model, device, label, analysis=False):
           confusion(stack_predicts, stack_labels)
           incorrect_preds(preds, y, x)
         return float(acc)
+
+def plot_model_features(model_load_path):
+    # Seed
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    
+    device = setup_device()
+    
+    # Load existing model
+    model = MyResNet()
+    model.load_state_dict(
+        torch.load(model_load_path, map_location=device)
+    )
+    
+    fig = plt.tight_layout()
+    activation = {}
+    def get_activation(name):
+        def hook(model, input, output):
+            activation[name] = output.detach()
+        return hook
+    vis_labels = ['conv1', 'layer1', 'layer2', 'layer3', 'layer4', 'layer5', 'layer6']
+
+    for l in vis_labels:
+        getattr(model, l).register_forward_hook(get_activation(l))
+        
+
+    test_path = "NaturalImageNetTest"
+    
+    # Create and normalise dataset
+    test_dataset = datasets.ImageFolder(test_path)
+    test_dataset = NormalisedDataset(test_dataset)
+
+
+
+    data, _ = test_dataset[999]
+    data = data.unsqueeze_(0).to(device=device, dtype=torch.float32)
+    output = model(data)
+
+    for idx, l in enumerate(vis_labels):
+        act = activation[l].squeeze()
+
+        # only showing the first 16 channels
+        ncols, nrows = 8, 2
+        
+        fig, axarr = plt.subplots(nrows, ncols, figsize=(15,5))
+        fig.suptitle(l)
+
+        count = 0
+        for i in range(nrows):
+            for j in range(ncols):
+                axarr[i, j].imshow(act[count].cpu())
+                axarr[i, j].axis('off')
+                count += 1

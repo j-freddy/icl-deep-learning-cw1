@@ -1,15 +1,13 @@
 import argparse
 import numpy as np
 import torch
-import torch.nn.functional as F
-import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchvision import datasets
 
-from const import IMAGENET_MEAN, IMAGENET_STD, INPUT_DTYPE, SEED
+from const import SEED
 from normalised_dataset import NormalisedDataset
 from resnet import MyResNet
-from utils import check_accuracy, create_dataloaders, setup_device, split_dataset, view_samples
+from utils import check_accuracy, create_dataloaders, setup_device, split_dataset
 
 def parse_args():
     parser = argparse.ArgumentParser()
