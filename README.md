@@ -5,9 +5,11 @@
 TODO
 
 ```sh
-python -m train --epochs 1 --model_save_path to_delete.pt
+# Train
+python -m train --epochs 20 --model_save_path model.pt
+# Test
 python -m test --model_load_path model.pt
-
+# Tensorboard
 tensorboard --logdir=runs
 ```
 
@@ -24,9 +26,9 @@ tensorboard --logdir=runs
 11m 38s
 ```
 
-### Changes to Skeleton Code
+### TODO
 
-- overall refactor for maintainability (e.g. less local variables, modularise
-  code) and allow flexibility (e.g. `split_dataset` function with split factor
-  parameter)
-- no shuffling in test DataLoader
+1. hparam tuning of augmentation pipeline (save graphs only)
+    - look into custom naming of runs
+2. then hparam tuning of other params (save graphs only) (justification: to
+   squeeze out last bit of performance)

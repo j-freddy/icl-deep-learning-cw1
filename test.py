@@ -30,6 +30,35 @@ def parse_args():
 
     return parser.parse_args()
 
+def network_performance(model_load_path):
+    # Seed
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    
+    device = setup_device()
+    
+    test_path = "NaturalImageNetTest"
+    
+    # Create and normalise dataset
+    test_dataset = datasets.ImageFolder(test_path)
+    test_dataset = NormalisedDataset(test_dataset)
+    
+    loader_test = DataLoader(
+        test_dataset,
+        batch_size=128,
+        shuffle=False,
+        num_workers=2,
+    )
+    
+    # Load existing model
+    model = MyResNet()
+    model.load_state_dict(
+        torch.load(model_load_path, map_location=device)
+    )
+    
+    # Report accuracy
+    check_accuracy(loader_test, model, device, "test", analysis="true")
+
 def main(flags):
     # Seed
     np.random.seed(SEED)
