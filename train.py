@@ -105,7 +105,6 @@ def train_part(
             model,
             device,
             label="validation",
-            writer=writer,
         )
         
         writer.add_scalar("Accuracy/val over epoch", val_acc, e)
