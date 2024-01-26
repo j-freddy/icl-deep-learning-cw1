@@ -6,7 +6,7 @@ TODO
 
 ```sh
 python -m train --epochs 1 --model_save_path to_delete.pt
-python -m test --model_load_path model_baseline.pt
+python -m test --model_load_path model.pt
 ```
 
 ## Notes
