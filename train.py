@@ -141,7 +141,7 @@ def main(flags):
     # Train the network
     model = MyResNet()
 
-    optimizer = optim.Adamax(model.parameters(), lr=0.0001, weight_decay=1e-7) 
+    optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
 
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Total number of parameters is: {}".format(params))
