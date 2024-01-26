@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import datasets
 from augmented_dataset import AugmentedDataset
 
@@ -50,6 +51,7 @@ def train_part(
     device,
     loader_train,
     loader_val,
+    writer,
     epochs=1,
 ):
     """
@@ -62,6 +64,7 @@ def train_part(
         on, e.g. CUDA, GPU, CPU
     - loader_train: A DataLoader object for training data batches
     - loader_val: A DataLoader object for validation data batches
+    - writer: A SummaryWriter object for Tensorboard
     - epochs: (Optional) A Python integer giving the number of epochs to train
         for
     
@@ -91,9 +94,21 @@ def train_part(
             optimizer.step()
 
             if t % 10 == 0:
+                curr_step = e * len(loader_train) + t
+                
+                # Log loss
                 print("Epoch: %d, Iteration %d, loss = %.4f" % (e, t, loss.item()))
+                writer.add_scalar("Loss/train over step", loss, curr_step)
 
-        check_accuracy(loader_val, model, device, label="validation")
+        val_acc = check_accuracy(
+            loader_val,
+            model,
+            device,
+            label="validation",
+            writer=writer,
+        )
+        
+        writer.add_scalar("Accuracy/val over epoch", val_acc, e)
 
 def main(flags):
     # Seed
@@ -104,6 +119,9 @@ def main(flags):
 
     train_path = "NaturalImageNetTrain"
     test_path = "NaturalImageNetTest"
+    
+    # Tensorboard
+    writer = SummaryWriter()
 
     # Create and split datasets
     train_dataset = datasets.ImageFolder(train_path)
@@ -152,6 +170,7 @@ def main(flags):
         device,
         loader_train,
         loader_val,
+        writer,
         epochs=flags.epochs,
     )
 
