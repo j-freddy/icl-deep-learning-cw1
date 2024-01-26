@@ -57,7 +57,23 @@ def network_performance(model_load_path):
     )
     
     # Report accuracy
-    check_accuracy(loader_test, model, device, "test", analysis="true")
+    check_accuracy(loader_test, model, device, "test", analysis=True)
+
+def test_out_of_distribution(model_load_path, loader):
+    # Seed
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    
+    device = setup_device()
+    
+    # Load existing model
+    model = MyResNet()
+    model.load_state_dict(
+        torch.load(model_load_path, map_location=device)
+    )
+    
+    # Report accuracy
+    check_accuracy(loader, model, device, "ood", analysis=True)
 
 def main(flags):
     # Seed
