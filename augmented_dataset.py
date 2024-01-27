@@ -4,7 +4,14 @@ from torch.utils.data import TensorDataset as Dataset
 from const import IMAGENET_MEAN, IMAGENET_STD
 
 class AugmentedDataset(Dataset):
-  def __init__(self, data):
+  def __init__(
+    self,
+    data,
+    crop_scale=0.2,
+    color_bcs=0.5,
+    color_hue=0.1,
+    jitter_p=0.75,
+  ):
     self.data = data
     self.transform = transforms.Compose(
         [
@@ -12,17 +19,17 @@ class AugmentedDataset(Dataset):
 
             # Apply augmentations
             transforms.RandomHorizontalFlip(),
-            transforms.RandomResizedCrop(256, scale=(0.2, 1.0)),
+            transforms.RandomResizedCrop(256, scale=(crop_scale, 1.0)),
             transforms.RandomApply(
                 [
                     transforms.ColorJitter(
-                        brightness=0.5,
-                        contrast=0.5,
-                        saturation=0.5,
-                        hue=0.1
+                        brightness=color_bcs,
+                        contrast=color_bcs,
+                        saturation=color_bcs,
+                        hue=color_hue,
                     )
                 ],
-                p=0.75,
+                p=jitter_p,
             ),
 
             # Normalise

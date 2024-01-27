@@ -28,6 +28,51 @@ def parse_args():
         help="Save model to path. (default: model.pt)",
         default="model.pt",
     )
+    
+    parser.add_argument(
+        "--lr",
+        type=float,
+        help="Learning rate. (default: 0.001)",
+        default=0.001,
+    )
+    
+    parser.add_argument(
+        "--weight_decay",
+        type=float,
+        help="Weight decay. (default: 0.0001)",
+        default=0.0001,
+    )
+    
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        help="Batch size. (default: 128)",
+        default=128,
+    )
+    
+    parser.add_argument(
+        "--aug_crop_scale",
+        type=float,
+        default=0.2,
+    )
+    
+    parser.add_argument(
+        "--aug_color_bcs",
+        type=float,
+        default=0.5,
+    )
+    
+    parser.add_argument(
+        "--aug_color_hue",
+        type=float,
+        default=0.1,
+    )
+    
+    parser.add_argument(
+        "--aug_jitter_p",
+        type=float,
+        default=0.75,
+    )
 
     parser.add_argument(
         "--view_samples",
@@ -120,7 +165,7 @@ def main(flags):
     test_path = "NaturalImageNetTest"
     
     # Tensorboard
-    writer = SummaryWriter()
+    writer = SummaryWriter(log_dir=f"runs/{flags.model_save_path}")
 
     # Create and split datasets
     train_dataset = datasets.ImageFolder(train_path)
@@ -129,7 +174,13 @@ def main(flags):
     train_set, val_set = split_dataset(train_dataset, val_split=0.1)
     
     # Augment the training set
-    train_set = AugmentedDataset(train_set)
+    train_set = AugmentedDataset(
+        train_set,
+        crop_scale=flags.aug_crop_scale,
+        color_bcs=flags.aug_color_bcs,
+        color_hue=flags.aug_color_hue,
+        jitter_p=flags.aug_jitter_p,
+    )
     # Normalise the validation and test sets
     val_set = NormalisedDataset(val_set)
     test_dataset = NormalisedDataset(test_dataset)
@@ -143,7 +194,7 @@ def main(flags):
         train_set,
         val_set,
         test_dataset,
-        batch_size=128,
+        batch_size=flags.batch_size,
     )
     
     # View sample images
@@ -158,7 +209,11 @@ def main(flags):
     # Train the network
     model = MyResNet()
 
-    optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=flags.lr,
+        weight_decay=flags.weight_decay,
+    )
 
     params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("Total number of parameters is: {}".format(params))
