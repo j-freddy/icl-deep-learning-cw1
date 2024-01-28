@@ -14,21 +14,18 @@ export PATH=/vol/bitbucket/${USER}/deep-learning-cw1/venv/bin/:$PATH
 source activate
 
 # ==============================================================================
-# slurm-tune-augmentations
+# slurm-tune-hparams
 # ==============================================================================
 
-for crop_scale in 0.1 0.2 0.3
+for lr in 1e-3 1e-2 1e-1
 do
-    for color_bcs in 0.4 0.5 0.6
+    for wd in 1e-4 1e-3 1e-2
     do
-        for color_hue in 0.05 0.1 0.15
+        for batch_size in 32 64 128 256
         do
-            for jitter_p in 0.6 0.75 0.9
-            do
-                model_name="cropscale${crop_scale}-bcs${color_bcs}-hue${color_hue}-jitterp${jitter_p}"
+            model_name="lr${lr}-wd${wd}-batch${batch_size}"
 
-                python -m train --model_save_path $model_name --aug_crop_scale $crop_scale --aug_color_bcs $color_bcs --aug_color_hue $color_hue --aug_jitter_p $jitter_p
-            done
+            python -m train --model_save_path ${model_name} --lr $lr --wd $wd --batch_size $batch_size --epochs 20
         done
     done
 done

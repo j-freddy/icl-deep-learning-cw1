@@ -7,10 +7,10 @@ class AugmentedDataset(Dataset):
   def __init__(
     self,
     data,
-    crop_scale=0.2,
-    color_bcs=0.5,
-    color_hue=0.1,
-    jitter_p=0.75,
+    crop_scale=0.3,
+    color_bcs=0.4,
+    color_hue=0.05,
+    jitter_p=0.9,
   ):
     self.data = data
     self.transform = transforms.Compose(
