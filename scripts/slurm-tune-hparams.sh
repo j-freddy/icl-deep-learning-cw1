@@ -25,7 +25,7 @@ do
         do
             model_name="lr${lr}-wd${wd}-batch${batch_size}"
 
-            python -m train --model_save_path ${model_name} --lr $lr --wd $wd --batch_size $batch_size --epochs 20
+            python -m train --model_save_path ${model_name} --lr $lr --weight_decay $wd --batch_size $batch_size --epochs 20
         done
     done
 done
