@@ -10,7 +10,7 @@ python -m train --epochs 20 --model_save_path model.pt
 # Test
 python -m test --model_load_path model_final.pt
 # Tensorboard
-tensorboard --logdir=runs
+tensorboard --logdir=runs/model-final
 ```
 
 ## Notes
